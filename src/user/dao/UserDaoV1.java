@@ -2,18 +2,11 @@ package user.dao;
 
 import user.domain.User;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
-public class UserDao {
-    private ConnectionMaker connectionMaker;
-    public UserDao(){
-        connectionMaker = new DConnectionMaker();
-    }
+public abstract class UserDaoV1 {
     public void add(User user) throws ClassNotFoundException, SQLException{
-        Connection connection = connectionMaker.makeConnection();
+        Connection connection = getConnection();
 
         PreparedStatement ps = connection.prepareStatement("insert into users(id, name, password) values(?,?,?)");
         ps.setString(1, user.getId());
@@ -27,7 +20,7 @@ public class UserDao {
     }
 
     public User get(String id) throws ClassNotFoundException, SQLException{
-        Connection connection = connectionMaker.makeConnection();
+        Connection connection = getConnection();
 
         PreparedStatement ps = connection.prepareStatement("select * from users where id = ?");
         ps.setString(1, id);
@@ -45,4 +38,6 @@ public class UserDao {
 
         return user;
     }
+
+    protected abstract Connection getConnection() throws ClassNotFoundException, SQLException;
 }
