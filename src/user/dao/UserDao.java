@@ -5,28 +5,16 @@ import user.domain.User;
 import java.sql.*;
 
 public class UserDao {
-    public static void main(String[] args) throws ClassNotFoundException, SQLException{
-        UserDao dao = new UserDao();
-
-        User user = new User();
-        user.setId("sunggyu");
-        user.setName("노성규");
-        user.setPassword("shtjdrb");
-
-        dao.add(user);
-
-        System.out.println(user.getId() + " 등록 성공");
-
-        User user2 = dao.get(user.getId());
-        System.out.println(user2.getName());
-        System.out.println(user2.getPassword());
-
-        System.out.println(user2.getId() + " 조회 성공");
+    private ConnectionMaker connectionMaker;
+    public UserDao(ConnectionMaker connectionMaker){
+        this.connectionMaker = connectionMaker;
     }
+    //크게 3가지의 관심사항으로 분리해볼 수 있다.
     public void add(User user) throws ClassNotFoundException, SQLException{
-        Class.forName ("org.h2.Driver");
-        Connection c = DriverManager.getConnection("jdbc:h2:~/toby", "sa","");
+        //1. 커넥션 연결
+        Connection c = connectionMaker.makeConnection();
 
+        //2. state 생성
         PreparedStatement ps = c.prepareStatement(
                 "insert into users(id, name, password) values(?,?,?)");
 
@@ -36,13 +24,13 @@ public class UserDao {
 
         ps.executeUpdate();
 
+        //3. 사용한 리소스를 닫는 작업
         ps.close();
         c.close();
     }
 
     public User get(String id) throws ClassNotFoundException, SQLException{
-        Class.forName ("org.h2.Driver");
-        Connection c = DriverManager.getConnection("jdbc:h2:~/toby", "sa","");
+        Connection c = connectionMaker.makeConnection();
 
         PreparedStatement ps = c.prepareStatement("select * from users where id = ?");
         ps.setString(1, id);
